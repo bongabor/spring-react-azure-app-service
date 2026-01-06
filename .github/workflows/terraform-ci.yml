@@ -39,6 +39,8 @@ jobs:
 
       - name: Terraform Init
         working-directory: terraform
+        env:
+          ARM_ACCESS_KEY: ${{ secrets.TFSTATE_STORAGE_KEY }}
         run: |
           terraform init \
             -backend-config="resource_group_name=MyLowCostVM_group" \
