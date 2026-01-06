@@ -1,4 +1,4 @@
-# Spring Boot & ReactJS Template
+# Spring Boot & ReactJS
 <img src="./assets/stack.png" style="background-color:white;"/>
 
 [![Terraform](https://github.com/LucasCarioca/spring-react-azure-app-service/actions/workflows/terraform-ci.yml/badge.svg)](https://github.com/LucasCarioca/spring-react-azure-app-service/actions/workflows/terraform-ci.yml)
