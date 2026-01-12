@@ -21,11 +21,11 @@ resource "azurerm_app_service" "appservice" {
   app_service_plan_id = azurerm_app_service_plan.serviceplan.id
 
   site_config {
-    always_on               = true
-    java_version            = "11"
-    java_container          = "JAVA"
-    java_container_version  = "11"
-    app_command_line        = "java -jar /home/site/wwwroot/*.jar" 
+    always_on              = true
+    java_version           = "11"
+    java_container         = "JAVA"
+    java_container_version = "11"
+    app_command_line       = "java -jar /home/site/wwwroot/*.jar" 
   }
 
   app_settings = {}
