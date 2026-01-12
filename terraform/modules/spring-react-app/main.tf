@@ -25,7 +25,7 @@ resource "azurerm_app_service" "appservice" {
     java_version           = "11"
     java_container         = "JAVA"
     java_container_version = "11"
-    app_command_line       = "java -jar /home/site/wwwroot/*.jar" 
+    app_command_line       = "java -jar /home/site/wwwroot/*.jar"
   }
 
   app_settings = {}
