@@ -21,16 +21,16 @@ jobs:
     - name: Terraform Apply
       run: make terraform-apply
       env:
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      ARM_ACCESS_KEY: ${{ secrets.TFSTATE_STORAGE_KEY }}
-      TF_VAR_subscription_id: ${{ secrets.TF_VAR_subscription_id }}
-      TF_VAR_tenant_id: ${{ secrets.TF_VAR_tenant_id }}
-      TF_VAR_name: ${{ secrets.TF_VAR_name }}
-      TF_VAR_location: ${{ secrets.TF_VAR_location }}
-      TF_VAR_env: ${{ secrets.TF_VAR_env }}
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        ARM_ACCESS_KEY: ${{ secrets.TFSTATE_STORAGE_KEY }}
+        TF_VAR_subscription_id: ${{ secrets.TF_VAR_subscription_id }}
+        TF_VAR_tenant_id: ${{ secrets.TF_VAR_tenant_id }}
+        TF_VAR_name: ${{ secrets.TF_VAR_name }}
+        TF_VAR_location: ${{ secrets.TF_VAR_location }}
+        TF_VAR_env: ${{ secrets.TF_VAR_env }}
     - name: Build UI Non Prod
       run: make ui-build-nonprod
     - name: Build Backend
