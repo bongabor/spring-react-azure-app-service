@@ -7,10 +7,14 @@ terraform-validate:
 	terraform validate; \
 	terraform plan
 
-terraform-apply: 
-	cd terraform; \
-	terraform init; \
-	terraform apply --auto-approve
+terraform-apply:
+    cd terraform && \
+    terraform init -input=false \
+        -backend-config="resource_group_name=MyLowCostVM_group" \
+        -backend-config="storage_account_name=tfstateaccount2026" \
+        -backend-config="container_name=tfstate" \
+        -backend-config="key=prod.tfstate" && \
+    terraform apply -auto-approve
 
 terraform-destroy:
 	cd terraform; \
