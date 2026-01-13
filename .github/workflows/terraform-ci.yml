@@ -35,9 +35,9 @@ jobs:
         working-directory: ./terraform
         run: terraform fmt -check -recursive -diff
 
-      - name: Terraform Init (no backend)
+      - name: Terraform Init (no backend, upgrade providers)
         working-directory: ./terraform
-        run: terraform init -backend=false
+        run: terraform init -backend=false -upgrade
 
       - name: Terraform Validate
         working-directory: ./terraform
