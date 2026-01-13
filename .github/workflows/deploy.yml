@@ -87,6 +87,26 @@ jobs:
               --source ./ui/build \
               --only-show-errors
 
+      
+      # Make sure you already logged in earlier in the job:
+      # - uses: azure/login@v2
+      #   with:
+      #     creds: ${{ secrets.AZURE_CREDENTIALS_JSON }}
+      - name: Azure CLI (on-runner)
+        uses: azure/cli@v2
+        with:
+          azcliversion: latest   # or omit to use preinstalled az
+          inlineScript: |
+            az account show
+            # OPTIONAL but recommended for AAD data-plane auth on Storage:
+            # az role assignment ensure you have "Storage Blob Data Contributor" on the account.
+            az storage blob upload-batch \
+              --account-name "${{ secrets.AZURE_STORAGE_ACCOUNT }}" \
+              --destination '$web' \
+              --source ./ui/build \
+              --auth-mode login \
+              --only-show-errors
+
       # ---------- Deploy Backend JAR to App Service ----------
       # azure/webapps-deploy will use the SPN session from azure/login.
       - name: Deploy Backend App Service
