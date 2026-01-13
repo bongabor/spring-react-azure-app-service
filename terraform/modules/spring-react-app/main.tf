@@ -3,6 +3,12 @@ resource "azurerm_resource_group" "rg" {
   location = var.location
 }
 
+resource "random_string" "sa_suffix" {
+  length  = 5
+  upper   = false
+  special = false
+}
+
 resource "azurerm_app_service_plan" "serviceplan" {
   name                = "${var.name}-plan"
   location            = azurerm_resource_group.rg.location
