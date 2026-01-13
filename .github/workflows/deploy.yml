@@ -51,6 +51,14 @@ jobs:
       - name: Terraform Apply
         run: make terraform-apply
 
+      # Pin Node 16 for CRA/PostCSS compatibility
+      - name: Setup Node for UI build
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16.20.2'
+          cache: 'yarn'
+          cache-dependency-path: ui/yarn.lock
+
       # ---------- Build artifacts ----------
       - name: Build UI (non-prod)
         run: make ui-build-nonprod
