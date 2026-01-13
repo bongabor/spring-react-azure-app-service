@@ -10,8 +10,8 @@ terraform-validate:
 terraform-apply:
 	cd terraform && \
 	terraform init -upgrade -input=false \
-		-backend-config="resource_group_name=MyLowCostVM_group" \
-		-backend-config="storage_account_name=tfstateaccount2026" \
+		-backend-config="resource_group_name=dev" \
+		-backend-config="storage_account_name=mcppoceaiwb" \
 		-backend-config="container_name=tfstate" \
 		-backend-config="key=prod.tfstate" && \
 	terraform apply -auto-approve
