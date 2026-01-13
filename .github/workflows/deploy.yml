@@ -73,21 +73,7 @@ jobs:
         uses: azure/login@v2
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS_JSON }}
-
-      # ---------- Deploy UI to Storage (Static Website) ----------
-      # Upload build output to the $web container of the Storage Account named by TF_VAR_name.
-      - name: Deploy UI (Static Website)
-        uses: azure/CLI@v1
-        with:
-          azcliversion: 2.20.0
-          inlineScript: |
-            az storage blob upload-batch \
-              --account-name "${{ secrets.TF_VAR_name }}" \
-              --destination '$web' \
-              --source ./ui/build \
-              --only-show-errors
-
-      
+   
       # Make sure you already logged in earlier in the job:
       # - uses: azure/login@v2
       #   with:
@@ -105,6 +91,19 @@ jobs:
               --destination '$web' \
               --source ./ui/build \
               --auth-mode login \
+              --only-show-errors
+
+      # ---------- Deploy UI to Storage (Static Website) ----------
+      # Upload build output to the $web container of the Storage Account named by TF_VAR_name.
+      - name: Deploy UI (Static Website)
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.20.0
+          inlineScript: |
+            az storage blob upload-batch \
+              --account-name "${{ secrets.TF_VAR_name }}" \
+              --destination '$web' \
+              --source ./ui/build \
               --only-show-errors
 
       # ---------- Deploy Backend JAR to App Service ----------
