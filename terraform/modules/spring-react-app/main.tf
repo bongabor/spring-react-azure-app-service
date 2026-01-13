@@ -32,7 +32,7 @@ resource "azurerm_app_service" "appservice" {
 }
 
 resource "azurerm_storage_account" "staticwebapp" {
-  name                       = var.name
+  name                       = lower("${var.name}${random_string.sa_suffix.result}")
   resource_group_name        = azurerm_resource_group.rg.name
   location                   = azurerm_resource_group.rg.location
   account_tier               = "Standard"
