@@ -69,10 +69,10 @@ jobs:
       # ---------- Deploy (authenticate once via SPN) ----------
       # This logs in to Azure using the Service Principal JSON in AZURE_SP_CREDENTIALS.
       # Required since Publish Profile is not available with Basic Auth disabled.
-      - name: Azure Login (Service Principal)
-        uses: azure/login@v1
+      - name: Azure login (Service Principal secret)
+        uses: azure/login@v2
         with:
-          creds: ${{ secrets.AZURE_SP_CREDENTIALS }}
+          creds: ${{ secrets.AZURE_CREDENTIALS_JSON }}
 
       # ---------- Deploy UI to Storage (Static Website) ----------
       # Upload build output to the $web container of the Storage Account named by TF_VAR_name.
