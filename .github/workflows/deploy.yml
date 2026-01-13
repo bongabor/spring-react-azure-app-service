@@ -1,52 +1,88 @@
+
 name: Deploy
 on:
   push:
     branches:
       - main
+
 jobs:
   deploy:
-    name: 'Deploy'
+    name: Deploy
     runs-on: ubuntu-latest
+
+    # Global env for this job (used by Terraform and/or az CLI steps)
+    env:
+      # Terraform backend (Azure Storage) access key
+      ARM_ACCESS_KEY: ${{ secrets.TFSTATE_STORAGE_KEY }}
+
+      # Terraform AzureRM provider auth (Service Principal)
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+
+      # Terraform variables (auto-mapped via TF_VAR_*)
+      TF_VAR_subscription_id: ${{ secrets.TF_VAR_subscription_id }}
+      TF_VAR_tenant_id:       ${{ secrets.TF_VAR_tenant_id }}
+      TF_VAR_name:            ${{ secrets.TF_VAR_name }}
+      TF_VAR_location:        ${{ secrets.TF_VAR_location }}
+      TF_VAR_env:             ${{ secrets.TF_VAR_env }}
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - uses: hashicorp/setup-terraform@v1
-      with:
-        terraform_version: 0.14.7
-    - uses: actions/setup-java@v1
-      with:
-        java-version: '11'
-        java-package: jdk 
-        architecture: x64 
-    - name: Terraform Apply
-      run: make terraform-apply
-      env:
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-        ARM_ACCESS_KEY: ${{ secrets.TFSTATE_STORAGE_KEY }}
-        TF_VAR_subscription_id: ${{ secrets.TF_VAR_subscription_id }}
-        TF_VAR_tenant_id: ${{ secrets.TF_VAR_tenant_id }}
-        TF_VAR_name: ${{ secrets.TF_VAR_name }}
-        TF_VAR_location: ${{ secrets.TF_VAR_location }}
-        TF_VAR_env: ${{ secrets.TF_VAR_env }}
-    - name: Build UI Non Prod
-      run: make ui-build-nonprod
-    - name: Build Backend
-      run: make backend-build
-    - uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_SP_CREDENTIALS }}
-    - name: Deploy UI Non Prod
-      uses: azure/CLI@v1
-      with:
-        azcliversion: 2.20.0
-        inlineScript: |
-          az storage blob upload-batch --account-name ${{ secrets.TF_VAR_name }} -d '$web' -s ./ui/build
-    - name: Deploy Backend Non Prod
-      uses: azure/webapps-deploy@v2
-      with: 
-        app-name: ${{ secrets.TF_VAR_name }}-bff-${{ secrets.TF_VAR_env }}
-        publish-profile: ${{ env.AZURE_SP_CREDENTIALS }}
-        package: backend/build/libs/*.jar
+      # ---------- Source ----------
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ---------- Tooling ----------
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+          cache: gradle
+
+      # ---------- Infra: Terraform ----------
+      # Uses ARM_* env vars above to authenticate provider non-interactively
+      - name: Terraform Apply
+        run: make terraform-apply
+
+      # ---------- Build artifacts ----------
+      - name: Build UI (non-prod)
+        run: make ui-build-nonprod
+
+      - name: Build Backend
+        run: make backend-build
+
+      # ---------- Deploy (authenticate once via SPN) ----------
+      # This logs in to Azure using the Service Principal JSON in AZURE_SP_CREDENTIALS.
+      # Required since Publish Profile is not available with Basic Auth disabled.
+      - name: Azure Login (Service Principal)
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_SP_CREDENTIALS }}
+
+      # ---------- Deploy UI to Storage (Static Website) ----------
+      # Upload build output to the $web container of the Storage Account named by TF_VAR_name.
+      - name: Deploy UI (Static Website)
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.20.0
+          inlineScript: |
+            az storage blob upload-batch \
+              --account-name "${{ secrets.TF_VAR_name }}" \
+              --destination '$web' \
+              --source ./ui/build \
+              --only-show-errors
+
+      # ---------- Deploy Backend JAR to App Service ----------
+      # azure/webapps-deploy will use the SPN session from azure/login.
+      - name: Deploy Backend App Service
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ secrets.TF_VAR_name }}-bff-${{ secrets.TF_VAR_env }}
+          package: backend/build/libs/*.jar
